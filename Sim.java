@@ -128,7 +128,7 @@ public class Sim {
     return genes;
   }
 
-  public void runGroupwiseMeasures() throws SLIB_Exception {
+  public void runGroupwiseMeasures(int sim_id) throws SLIB_Exception {
     final int geneNum = genes.length;
 
     // // Vertices excluding gene products______________________________________
@@ -138,33 +138,33 @@ public class Sim {
     final SM_Engine engine = new SM_Engine(this.graph);
     final ICconf icConf = new IC_Conf_Topo("Resnik", SMConstants.FLAG_ICI_RESNIK_1995);
     final Sim that = this;
-    for (String flag: SMConstants.SIM_GROUPWISE_DAG.keySet()) {
-      final SMconf smConf = new SMconf(flag);
-      smConf.setICconf(icConf);
+    List<String> flags = new ArrayList<String>(SMConstants.SIM_GROUPWISE_DAG.keySet());
+    String flag = flags.get(sim_id);
+    final SMconf smConf = new SMconf(flag);
+    smConf.setICconf(icConf);
 
-      // 4. CALCULATE ALL MEASURES
-      double[] similarities = new double[geneNum * geneNum];
-      // Direct groupwise similarity in parallel.
-      IntToDoubleFunction compare = new IntToDoubleFunction() {
-        @Override
-        public double applyAsDouble(int i) {
-          try {
-            return engine.compare(
-              smConf,
-              that.genes[i / geneNum].getAnnotations(),
-              that.genes[i % geneNum].getAnnotations());
-          } catch (SLIB_Ex_Critic ex) {
-            Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
-          }
-          return -2.0;
+    // 4. CALCULATE ALL MEASURES
+    double[] similarities = new double[geneNum * geneNum];
+    // Direct groupwise similarity in parallel.
+    IntToDoubleFunction compare = new IntToDoubleFunction() {
+      @Override
+      public double applyAsDouble(int i) {
+        try {
+          return engine.compare(
+            smConf,
+            that.genes[i / geneNum].getAnnotations(),
+            that.genes[i % geneNum].getAnnotations());
+        } catch (SLIB_Ex_Critic ex) {
+          Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
         }
-      };
-      Arrays.parallelSetAll(similarities, compare);
-      this.saveResults(flag, similarities);
-    }
+        return -2.0;
+      }
+    };
+    Arrays.parallelSetAll(similarities, compare);
+    this.saveResults(flag, similarities);
   }
 
-  public void runPairwiseMeasures() throws SLIB_Exception {
+  public void runPairwiseMeasures(int sim_id) throws SLIB_Exception {
     final int geneNum = genes.length;
 
     // // Vertices excluding gene products______________________________________
@@ -179,41 +179,41 @@ public class Sim {
       SMConstants.FLAG_SIM_GROUPWISE_MIN,
       SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
     };
+    List<String> pairFlags = new ArrayList<String>(SMConstants.PAIRWISE_MEASURE_FLAGS);
     final ICconf icConf = new IC_Conf_Topo("Resnik", SMConstants.FLAG_ICI_RESNIK_1995);
     final Sim that = this;
-    for (String flagGroupwise: flags) {
-      final SMconf smConfGroupwise = new SMconf(flagGroupwise);
-      for (String flagPairwise: SMConstants.PAIRWISE_MEASURE_FLAGS) {
-
-        final SMconf smConfPairwise = new SMconf(flagPairwise);
-        smConfPairwise.setICconf(icConf);
-        // Schlicker indirect
-        if (flagPairwise.equals(SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006)) {
-          ICconf prob = new IC_Conf_Topo(SMConstants.FLAG_ICI_PROB_OCCURENCE_PROPAGATED);
-          smConfPairwise.addParam("ic_prob", prob);
-        }
-        // 4. CALCULATE ALL MEASURES
-        double[] similarities = new double[geneNum * geneNum];
-        // Direct groupwise similarity in parallel.
-        IntToDoubleFunction compare = new IntToDoubleFunction() {
-          @Override
-          public double applyAsDouble(int i) {
-            try {
-              return engine.compare(
-                smConfGroupwise,
-                smConfPairwise,
-                that.genes[i / geneNum].getAnnotations(),
-                that.genes[i % geneNum].getAnnotations());
-            } catch (SLIB_Ex_Critic ex) {
-              Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            return -2.0;
-          }
-        };
-        Arrays.parallelSetAll(similarities, compare);
-        this.saveResults(flagGroupwise + "__" + flagPairwise, similarities);
-      }
+    int i = 0;
+    String flagGroupwise = flags[sim_id / 38];
+    String flagPairwise = pairFlags.get(sim_id % 38);
+      int j = 0;
+    final SMconf smConfGroupwise = new SMconf(flagGroupwise);
+    final SMconf smConfPairwise = new SMconf(flagPairwise);
+    smConfPairwise.setICconf(icConf);
+    // Schlicker indirect
+    if (flagPairwise.equals(SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006)) {
+      ICconf prob = new IC_Conf_Topo(SMConstants.FLAG_ICI_PROB_OCCURENCE_PROPAGATED);
+      smConfPairwise.addParam("ic_prob", prob);
     }
+    // 4. CALCULATE ALL MEASURES
+    double[] similarities = new double[geneNum * geneNum];
+    // Direct groupwise similarity in parallel.
+    IntToDoubleFunction compare = new IntToDoubleFunction() {
+      @Override
+      public double applyAsDouble(int i) {
+        try {
+          return engine.compare(
+            smConfGroupwise,
+            smConfPairwise,
+            that.genes[i / geneNum].getAnnotations(),
+            that.genes[i % geneNum].getAnnotations());
+        } catch (SLIB_Ex_Critic ex) {
+          Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return -2.0;
+      }
+    };
+    Arrays.parallelSetAll(similarities, compare);
+    this.saveResults(flagGroupwise + "__" + flagPairwise, similarities);
   }
 
   public void saveResults(String filename, double[] similarities) {
@@ -230,10 +230,12 @@ public class Sim {
   }
 
   public static void main(String[] args) throws SLIB_Exception {
-    new Sim().runGroupwiseMeasures();
-    // for (String key: SMConstants.SIM_GROUPWISE_DAG.keySet()) {
-    //   System.out.println(key + " " + SMConstants.SIM_GROUPWISE_DAG.get(key));
-    // }
+    int sim_id = Integer.parseInt(args[0]);
+    // new Sim().runGroupwiseMeasures(sim_id);
+    new Sim().runPairwiseMeasures(sim_id);
+    // System.out.println(SMConstants.PAIRWISE_MEASURE_FLAGS.size());
+    // System.out.println(SMConstants.SIM_GROUPWISE_DAG.size());
+    // System.out.println(Arrays.toString(args));
   }
 
   class Gene {
