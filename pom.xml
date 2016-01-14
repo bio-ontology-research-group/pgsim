@@ -1,0 +1,41 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>sa.edu.kaust.cbrc</groupId>
+    <artifactId>pgsim</artifactId>
+    <version>0.1</version>
+    <packaging>jar</packaging>
+
+    <name>${project.artifactId}</name>
+    <description> Semantic similarity measures of randomly annotated by genes  </description>
+    <url>http://www.cbrc.kaust.edu.sa/</url>
+
+    <developers>
+        <developer>
+            <name>Maxat Kulmanov</name>
+            <email>maxat.kulmanov@kaust.edu.sa</email>
+            <organization>CBRC</organization>
+            <organizationUrl>http://cbrc.kaust.edu.sa/</organizationUrl>
+        </developer>
+    </developers>
+
+    <properties>
+        <slib.version>${project.version}</slib.version>
+        <sml-toolkit.version>${project.version}</sml-toolkit.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
+        <timestamp>${maven.build.timestamp}</timestamp>
+    </properties>
+
+    <dependencies>
+        <dependency>
+        <groupId>com.github.sharispe</groupId>
+        <artifactId>slib-sml</artifactId>
+        <version>0.9.1</version>
+        </dependency>
+    </dependencies>
+
+</project>
