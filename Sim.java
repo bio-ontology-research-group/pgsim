@@ -114,15 +114,15 @@ public class Sim {
         }
       }
     } catch (FileNotFoundException ex) {
-      Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+      ex.printStackTrace();
     } catch (IOException ex) {
-      Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+      ex.printStackTrace();
     } finally {
       try {
         reader.close();
         fis.close();
       } catch (IOException ex) {
-        Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+        ex.printStackTrace();
       }
     }
     return genes;
@@ -155,7 +155,7 @@ public class Sim {
             that.genes[i / geneNum].getAnnotations(),
             that.genes[i % geneNum].getAnnotations());
         } catch (SLIB_Ex_Critic ex) {
-          Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+          ex.printStackTrace();
         }
         return -2.0;
       }
@@ -190,10 +190,9 @@ public class Sim {
     final SMconf smConfPairwise = new SMconf(flagPairwise);
     smConfPairwise.setICconf(icConf);
     // Schlicker indirect
-    if (flagPairwise.equals(SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006)) {
-      ICconf prob = new IC_Conf_Topo(SMConstants.FLAG_ICI_PROB_OCCURENCE_PROPAGATED);
-      smConfPairwise.addParam("ic_prob", prob);
-    }
+    ICconf prob = new IC_Conf_Topo(SMConstants.FLAG_ICI_PROB_OCCURENCE_PROPAGATED);
+    smConfPairwise.addParam("ic_prob", prob);
+
     // 4. CALCULATE ALL MEASURES
     double[] similarities = new double[geneNum * geneNum];
     // Direct groupwise similarity in parallel.
@@ -207,9 +206,10 @@ public class Sim {
             that.genes[i / geneNum].getAnnotations(),
             that.genes[i % geneNum].getAnnotations());
         } catch (SLIB_Ex_Critic ex) {
-          Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+          ex.printStackTrace();
+          System.exit(0);
         }
-        return -2.0;
+        return -1.0;
       }
     };
     Arrays.parallelSetAll(similarities, compare);
@@ -225,7 +225,7 @@ public class Sim {
       }
       dos.close();
     } catch (IOException ex) {
-      Logger.getLogger(Sim.class.getName()).log(Level.SEVERE, null, ex);
+      ex.printStackTrace();
     }
   }
 
