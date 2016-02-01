@@ -143,8 +143,6 @@ GParsPool.withPool {
               smConfPairwise,
               genes[x].getAnnotations(),
               genes[y].getAnnotations())
-      c += 1
-      println c
     }
   }
 }
