@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-DATA_ROOT = './'
+DATA_ROOT = 'data/pairwise/'
 
 
 def load_data(filename):

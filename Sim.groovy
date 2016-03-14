@@ -143,12 +143,14 @@ GParsPool.withPool {
               smConfPairwise,
               genes[x].getAnnotations(),
               genes[y].getAnnotations())
+      println c
+      c++
     }
   }
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter(flagGroupwise + "_" + flagPairwise + ".txt")))
+  new FileWriter(this.args[0] + "_" + flagGroupwise + "_" + flagPairwise + ".txt")))
 for (i = 0; i < 25000000; i++) {
   def x = i.intdiv(5000)
   def y = i % 5000
