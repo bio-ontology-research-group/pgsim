@@ -5,8 +5,8 @@ ROOT="data/pairwise/"
 for f in $FILES; do
     bname=$(basename "$f")
     filename="${bname%.*}"
-    if [ ! -e "$ROOT$filename.pdf" ]; then
-        echo "Plotting the similarity $filename"
-        python plot.py $filename.txt
+    if [ ! -e "$ROOT$filename.corr.tsv" ]; then
+        echo "Running correlation for $filename"
+        python correlation.py $filename.txt
     fi
 done

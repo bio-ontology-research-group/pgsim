@@ -97,23 +97,35 @@ def sim_id = this.args[0].toInteger()
 
 SM_Engine engine = new SM_Engine(graph)
 
+// BMA+Resnik, BMA+Schlicker2006, BMA+Lin1998, BMA+Jiang+Conrath1997,
 // DAG-GIC, DAG-NTO, DAG-UI
 
 String[] flags = [
-  SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
-  SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
-  SMConstants.SMCFLAG_SIM_GROUPWISE_DAG_UI
+  SMConstants.FLAG_SIM_GROUPWISE_BMA,
 //  SMConstants.FLAG_SIM_GROUPWISE_BMM,
 //  SMConstants.FLAG_SIM_GROUPWISE_MAX,
 //  SMConstants.FLAG_SIM_GROUPWISE_MIN,
 //  SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
 ]
+// List<String> pairFlags = new ArrayList<String>(SMConstants.PAIRWISE_MEASURE_FLAGS);
+String[] pairFlags = [
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_EDGE_RESNIK_1995,
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_RESNIK_1995,
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006,
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_LIN_1998,
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_JIANG_CONRATH_1997_NORM
+]
 
 ICconf icConf = new IC_Conf_Topo("Resnik", SMConstants.FLAG_ICI_RESNIK_1995);
-String flagGroupwise = flags[sim_id];
-SMconf smConf = new SMconf(flagGroupwise);
+String flagGroupwise = flags[sim_id.intdiv(5)];
+String flagPairwise = pairFlags[sim_id % 5];
+SMconf smConfGroupwise = new SMconf(flagGroupwise);
 SMconf smConfPairwise = new SMconf(flagPairwise);
-smConf.setICconf(icConf);
+smConfPairwise.setICconf(icConf);
+
+// Schlicker indirect
+ICconf prob = new IC_Conf_Topo(SMConstants.FLAG_ICI_PROB_OCCURENCE_PROPAGATED);
+smConfPairwise.addParam("ic_prob", prob);
 
 def result = new Double[1000000]
 for (i = 0; i < 1000000; i++) {
@@ -129,7 +141,8 @@ GParsPool.withPool {
     def y = i % 1000
     if (x <= y) {
       result[i] = engine.compare(
-              smConf,
+              smConfGroupwise,
+              smConfPairwise,
               genes[x].getAnnotations(),
               genes[y].getAnnotations())
       println c
@@ -139,7 +152,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter(flagGroupwise + ".txt")))
+  new FileWriter(flagGroupwise + "_" + flagPairwise + ".txt")))
 for (i = 0; i < 1000000; i++) {
   def x = i.intdiv(1000)
   def y = i % 1000
