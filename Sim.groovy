@@ -102,7 +102,7 @@ SM_Engine engine = new SM_Engine(graph)
 String[] flags = [
   SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
   SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
-  SMConstants.SMCFLAG_SIM_GROUPWISE_DAG_UI
+  SMConstants.FLAG_SIM_GROUPWISE_DAG_UI
 //  SMConstants.FLAG_SIM_GROUPWISE_BMM,
 //  SMConstants.FLAG_SIM_GROUPWISE_MAX,
 //  SMConstants.FLAG_SIM_GROUPWISE_MIN,
@@ -112,7 +112,6 @@ String[] flags = [
 ICconf icConf = new IC_Conf_Topo("Resnik", SMConstants.FLAG_ICI_RESNIK_1995);
 String flagGroupwise = flags[sim_id];
 SMconf smConf = new SMconf(flagGroupwise);
-SMconf smConfPairwise = new SMconf(flagPairwise);
 smConf.setICconf(icConf);
 
 def result = new Double[1000000]
