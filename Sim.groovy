@@ -55,7 +55,7 @@ def getGeneOntology = {
   factory.loadNamespacePrefix("GO", graph_uri.toString())
   G graph = new GraphMemory(graph_uri)
 
-  // Load OBO file to graph "gene_ontology_ext.obo"
+  // Load OBO file to graph "go.obo"
   GDataConf goConf = new GDataConf(GFormat.OBO, "data/gene_ontology_ext.obo")
   GraphLoaderGeneric.populate(goConf, graph)
 
@@ -68,24 +68,43 @@ def getGeneOntology = {
   return graph
 }
 
-def getGenes = {
-  def geneNum = 1000
-  def geneGroups = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-  def genes = new Gene[geneNum]
-  new File("data/annotations_plain.txt").eachLine { line, i ->
-    i -= 1
-    def s = 0
-    for (def j = 0; j < geneGroups.size(); j++) {
-        def g = geneGroups[j]
-        s += g * 100
-        if (i < s) {
-            def id = (i - (s - g * 100)).intdiv(g) + j * 100
-            if (genes[id] == null) genes[id] = new Gene(id, new LinkedHashSet())
-            genes[id].addAnnotation(factory.getURI(line))
-            break
-        }
-    }
+// def getGenes = {
+//   def geneNum = 1000
+//   def geneGroups = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+//   def genes = new Gene[geneNum]
+//   new File("data/annotations_plain.txt").eachLine { line, i ->
+//     i -= 1
+//     def s = 0
+//     for (def j = 0; j < geneGroups.size(); j++) {
+//         def g = geneGroups[j]
+//         s += g * 100
+//         if (i < s) {
+//             def id = (i - (s - g * 100)).intdiv(g) + j * 100
+//             if (genes[id] == null) genes[id] = new Gene(id, new LinkedHashSet())
+//             genes[id].addAnnotation(factory.getURI(line))
+//             break
+//         }
+//     }
 
+//   }
+//   return genes
+// }
+
+def getURIfromGO = { go ->
+  def id = go.split('\\:')[1]
+  return factory.getURI("http://go/" + id)
+}
+
+def getGenes = {
+  def genes = []
+  def i = 0
+  new File("data/sgd_annotations.txt").splitEachLine('\t') { items ->
+    def s = 0
+    genes.push(new Gene(i, new LinkedHashSet()))
+    for (item in items) {
+      genes[i].addAnnotation(getURIfromGO(item))
+    }
+    i++
   }
   return genes
 }
@@ -97,57 +116,64 @@ def sim_id = this.args[0].toInteger()
 
 SM_Engine engine = new SM_Engine(graph)
 
+
 // DAG-GIC, DAG-NTO, DAG-UI
 
-String[] flags = [
-  SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
-  SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
-  SMConstants.FLAG_SIM_GROUPWISE_DAG_UI
-//  SMConstants.FLAG_SIM_GROUPWISE_BMM,
-//  SMConstants.FLAG_SIM_GROUPWISE_MAX,
-//  SMConstants.FLAG_SIM_GROUPWISE_MIN,
-//  SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
-]
+// String[] flags = [
+//   SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
+//   SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
+//   SMConstants.FLAG_SIM_GROUPWISE_DAG_UI
+// ]
 
-ICconf icConf = new IC_Conf_Topo("Resnik", SMConstants.FLAG_ICI_RESNIK_1995);
-String flagGroupwise = flags[sim_id];
-SMconf smConf = new SMconf(flagGroupwise);
-smConf.setICconf(icConf);
+// All
+List<String> flags = new ArrayList<String>(SMConstants.SIM_GROUPWISE_DAG.keySet());
+System.out.println(flags.size());
+// ICconf icConf = new IC_Conf_Topo("Sanchez", SMConstants.FLAG_ICI_SANCHEZ_2011);
+// // Map<URI, Double> ics = engine.getIC_results(icConf);
+// // for(URI uri: ics.keySet()) {
+// //   println uri.toString() + " " + ics.get(uri)
+// // }
 
-def result = new Double[1000000]
-for (i = 0; i < 1000000; i++) {
-  result[i] = i
-}
 
-def c = 0
+// String flagGroupwise = flags[sim_id];
+// SMconf smConf = new SMconf(flagGroupwise);
+// smConf.setICconf(icConf);
 
-GParsPool.withPool {
-  result.eachParallel { val ->
-    def i = val.toInteger()
-    def x = i.intdiv(1000)
-    def y = i % 1000
-    if (x <= y) {
-      result[i] = engine.compare(
-              smConf,
-              genes[x].getAnnotations(),
-              genes[y].getAnnotations())
-      println c
-      c++
-    }
-  }
-}
+// def result = new Double[genes.size() * genes.size()]
+// for (i = 0; i < result.size(); i++) {
+//   result[i] = i
+// }
 
-def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter(flagGroupwise + ".txt")))
-for (i = 0; i < 1000000; i++) {
-  def x = i.intdiv(1000)
-  def y = i % 1000
-  if (x <= y) {
-    fout.println(result[i])
-  } else {
-    def j = y * 1000 + x
-    fout.println(result[j])
-  }
-}
-fout.flush()
-fout.close()
+// def c = 0
+
+// GParsPool.withPool {
+//   result.eachParallel { val ->
+//     def i = val.toInteger()
+//     def x = i.intdiv(genes.size())
+//     def y = i % genes.size()
+//     if (x <= y) {
+//       result[i] = engine.compare(
+//               smConf,
+//               genes[x].getAnnotations(),
+//               genes[y].getAnnotations())
+//       if (c % 100000 == 0)
+//         println c
+//       c++
+//     }
+//   }
+// }
+
+// def fout = new PrintWriter(new BufferedWriter(
+//   new FileWriter("groupwise/" + flagGroupwise + ".txt")))
+// for (i = 0; i < result.size(); i++) {
+//   def x = i.intdiv(genes.size())
+//   def y = i % genes.size()
+//   if (x <= y) {
+//     fout.println(result[i])
+//   } else {
+//     def j = y * genes.size() + x
+//     fout.println(result[j])
+//   }
+// }
+// fout.flush()
+// fout.close()

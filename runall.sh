@@ -1,4 +1,4 @@
 #!/bin/bash
-for id in {0..4}; do
-    groovy SimGroupwise.groovy $id
+for id in {0..2}; do
+    groovy Sim.groovy $id
 done

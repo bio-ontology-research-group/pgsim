@@ -3,70 +3,52 @@
 import sys
 import os
 import numpy
+import random
+from utils import get_gene_ontology, shuffle
 
-def shuffle(*args, **kwargs):
-    """
-    Shuffle list of arrays with the same random state
-    """
-    seed = None
-    if 'seed' in kwargs:
-        seed = kwargs['seed']
-    rng_state = numpy.random.get_state()
-    for arg in args:
-        if seed is not None:
-            numpy.random.seed(seed)
-        else:
-            numpy.random.set_state(rng_state)
-        numpy.random.shuffle(arg)
+go = get_gene_ontology()
+go_depth = dict()
 
 
-def get_gene_ontology():
-    # Reading Gene Ontology from OBO Formatted file
-    go = dict()
-    obj = None
-    with open('data/gene_ontology_ext.obo', 'r') as f:
-        for line in f:
-            line = line.strip()
-            if not line:
-                continue
-            if line == '[Term]':
-                if obj is not None:
-                    go[obj['id']] = obj
-                obj = dict()
-                obj['is_a'] = list()
-                continue
-            elif line == '[Typedef]':
-                obj = None
-            else:
-                if obj is None:
-                    continue
-                l = line.split(": ")
-                if l[0] == 'id':
-                    obj['id'] = l[1]
-                elif l[0] == 'is_a':
-                    obj['is_a'].append(l[1].split(' ! ')[0])
-    if obj is not None:
-        go[obj['id']] = obj
-    for go_id, val in go.iteritems():
-        if 'children' not in val:
-            val['children'] = list()
-        for g_id in val['is_a']:
-            if 'children' not in go[g_id]:
-                go[g_id]['children'] = list()
-            go[g_id]['children'].append(go_id)
-    return go
+def get_go_by_depth(go_id, level):
+    if go_id not in go or 'is_absolete' in go[go_id]:
+        return
+    global go_depth
+    if level not in go_depth:
+        go_depth[level] = set()
+    go_depth[level].add(go_id)
+    for ch_id in go[go_id]['children']:
+        get_go_by_depth(ch_id, level + 1)
 
 
 def main():
-    print 'Loading gene ontology'
-    go = get_gene_ontology()
-    print 'Loaded'
-    go_ids = list(go.keys())
-    shuffle(go_ids)
-    gos = go_ids[:5500]
-    with open('data/annotations.txt', 'w') as f:
-        for go_id in gos:
-            f.write(go_id + '\n')
+    get_go_by_depth('GO:0008150', 1)  # Biological process Ontology
+    get_go_by_depth('GO:0005575', 1)  # Cellular component Ontology
+    get_go_by_depth('GO:0003674', 1)  # Molecular function Ontology
+    with open('data/depth_annotations.txt', 'w') as f:
+        for level in go_depth:
+            print level
+            gos = list(go_depth[level])
+            for i in range(100):
+                shuffle(gos)
+                n = abs(random.randint(2, min(100, len(gos)) - 1))
+                f.write(gos[0])
+                for go_id in gos[1:n]:
+                    f.write('\t' + go_id)
+                f.write('\n')
+    # print len(go)
+    # go_ids = [go_id for go_id in go if 'is_obsolete' not in go[go_id]]
+    # print len(go_ids)
+    # print len(go) - len(go_ids)
+    # shuffle(go_ids)
+    # with open('data/annotations.txt', 'w') as f:
+    #     for group in range(1, 56):
+    #         for i in range(100):
+    #             shuffle(go_ids)
+    #             f.write(go_ids[0])
+    #             for go_id in go_ids[1:group]:
+    #                 f.write('\t' + go_id)
+    #             f.write('\n')
 
 
 if __name__ == '__main__':

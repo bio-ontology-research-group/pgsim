@@ -3,6 +3,7 @@
 *.txt
 *.pdf
 *.gz
+*.pyc
 data/
 target/
 venv/

@@ -4,7 +4,7 @@ import sys
 import numpy as np
 from scipy.stats import spearmanr
 
-DATA_ROOT = 'data/pairwise/'
+DATA_ROOT = 'data/pairwise_new/'
 FILENAME = ''
 
 
@@ -21,33 +21,34 @@ def get_average_similarities():
     data = load_data(FILENAME)
     m = list()
     v = list()
-    for i in range(5):
-        for j in range(5):
+    for i in range(10):
+        for j in range(10):
             s = 0
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    s += data[x * 5000 + y]
-            mean = s / 1000000.0
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    s += data[x * 1000 + y]
+            mean = s / 10000.0
             m.append(mean)
             s = 0
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    t = data[x * 5000 + y] - mean
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    t = data[x * 1000 + y] - mean
                     s += t * t
-            var = s / 1000000.0
+            var = s / 10000.0
             v.append(var)
     return (m, v)
 
 
 def get_spearman_correlation():
     mean, var = get_average_similarities()
-    annots = [1, 10, 50, 100, 1000]
+    annots = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
     ret = list()
-    for i in range(5):
-        m = mean[i * 5:i * 5 + 5]
+    for i in range(10):
+        m = mean[i * 10:i * 10 + 10]
         print m
         r1, p1 = spearmanr(annots, m)
-        v = var[i * 5:i * 5 + 5]
+        v = var[i * 10:i * 10 + 10]
         print v
         r2, p2 = spearmanr(annots, v)
         ret.append((r1, p1, r2, p2))
@@ -58,26 +59,26 @@ def get_total_average_sims():
     data = load_data(FILENAME)
     m = list()
     v = list()
-    for i in range(5):
+    for i in range(10):
         s = 0
-        for x in range(i * 1000, (i + 1) * 1000):
-            for y in range(5000):
-                s += data[x * 5000 + y]
-        mean = s / 1000000.0
+        for x in range(i * 100, (i + 1) * 100):
+            for y in range(1000):
+                s += data[x * 1000 + y]
+        mean = s / 10000.0
         m.append(mean)
         s = 0
-        for x in range(i * 1000, (i + 1) * 1000):
-            for y in range(5000):
-                t = data[x * 5000 + y] - mean
+        for x in range(i * 100, (i + 1) * 100):
+            for y in range(1000):
+                t = data[x * 1000 + y] - mean
                 s += t * t
-        var = s / 1000000.0
+        var = s / 10000.0
         v.append(var)
     return (m, v)
 
 
 def get_total_spearman_correlation():
     mean, var = get_total_average_sims()
-    annots = [1, 10, 50, 100, 1000]
+    annots = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     r1, p1 = spearmanr(annots, mean)
     r2, p2 = spearmanr(annots, var)
     return (r1, p1, r2, p2)

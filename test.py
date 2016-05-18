@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind
 
-DATA_ROOT = 'data/pairwise/'
+DATA_ROOT = 'data/groupwise_new/'
 
 
 def load_data(filename):
@@ -19,13 +19,13 @@ def load_data(filename):
 
 def get_ttest(data):
     sets = list()
-    groups = [1, 10, 50, 100, 1000]
+    groups = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     for i in range(5):
         for j in range(i, 5):
             a = list()
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    a.append(data[x * 5000 + y])
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    a.append(data[x * 1000 + y])
             sets.append((groups[i], groups[j], a))
     results = list()
     n = len(sets)
@@ -41,13 +41,13 @@ def get_ttest(data):
 
 def get_ttest_total(data):
     sets = list()
-    groups = [1, 10, 50, 100, 1000]
+    groups = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     for i in range(5):
         for j in range(i, 5):
             a = list()
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    a.append(data[x * 5000 + y])
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    a.append(data[x * 1000 + y])
             sets.append((groups[i], groups[j], a))
     results = list()
     n = len(sets)

@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
-DATA_ROOT = 'data/pairwise/'
+DATA_ROOT = 'data/groupwise_new/'
 
 
 def load_data(filename):
@@ -18,19 +18,19 @@ def load_data(filename):
 
 def get_average_similarities(data):
     sims = list()
-    for i in range(5):
-        for j in range(5):
+    for i in range(10):
+        for j in range(10):
             s = 0
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    s += data[x * 5000 + y]
-            mean = s / 1000000.0
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    s += data[x * 1000 + y]
+            mean = s / 10000.0
             s = 0
-            for x in range(i * 1000, (i + 1) * 1000):
-                for y in range(j * 1000, (j + 1) * 1000):
-                    t = data[x * 5000 + y] - mean
+            for x in range(i * 100, (i + 1) * 100):
+                for y in range(j * 100, (j + 1) * 100):
+                    t = data[x * 1000 + y] - mean
                     s += t * t
-            var = s / 1000000.0
+            var = s / 10000.0
             sims.append((mean, var))
     return sims
 
@@ -45,7 +45,7 @@ def autolabel(ax, rects):
 
 
 def draw(sims, name):
-    N = 5
+    N = 10
     groups = list()
     for i in range(N):
         group = list()
@@ -54,9 +54,12 @@ def draw(sims, name):
         groups.append(group)
 
     ind = np.arange(N)  # the x locations for the groups
-    width = 0.15
+    width = 0.1
     locs = 0.0       # the width of the bars
-    colors = ('r', 'y', 'g', 'b', 'k')
+    colors = [
+        ('#b8860b',), ('#348abd',), ('#e8000b',), ('#64b5cd',), ('#b0e0e6',),
+        ('#8c0900',), ('#cc79a7',), ('#56b4e9',), ('#8b8b8b',), ('#03ed3a',)
+    ]
 
     fig, ax = plt.subplots()
     rects = list()
@@ -69,14 +72,15 @@ def draw(sims, name):
         rect = ax.bar(
             ind + locs,
             mean, width, color=colors[i], yerr=var)
-        locs += 0.15
+        locs += 0.1
         rects.append(rect)
 
     # add some text for labels, title and axes ticks
     ax.set_ylabel('Similarities')
     ax.set_title(name)
-    ax.set_xticks(ind + (locs - 0.3))
-    ax.set_xticklabels(('1', '10', '50', '100', '1000'))
+    ax.set_xticks(ind + (locs - 0.2))
+    ax.set_xticklabels((
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'))
 
     # Shrink current axis by 20%
     box = ax.get_position()
@@ -87,7 +91,7 @@ def draw(sims, name):
     for rect in rects:
         legends.append(rect[0])
     ax.legend(
-        legends, ('1', '10', '50', '100', '1000'),
+        legends, ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10'),
         loc='center left', bbox_to_anchor=(1, 0.5))
 
     for rect in rects:
@@ -103,7 +107,7 @@ def main(*args, **kwargs):
     name = os.path.splitext(basename)[0]
     sims = get_average_similarities(data)
     draw(sims, name)
-    plt.savefig(name + '.pdf')
+    plt.savefig(DATA_ROOT + name + '.pdf')
 
 if __name__ == '__main__':
     main(*sys.argv)
