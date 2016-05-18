@@ -126,54 +126,54 @@ SM_Engine engine = new SM_Engine(graph)
 // ]
 
 // All
-List<String> flags = new ArrayList<String>(SMConstants.SIM_GROUPWISE_DAG.keySet());
-System.out.println(flags.size());
-// ICconf icConf = new IC_Conf_Topo("Sanchez", SMConstants.FLAG_ICI_SANCHEZ_2011);
-// // Map<URI, Double> ics = engine.getIC_results(icConf);
-// // for(URI uri: ics.keySet()) {
-// //   println uri.toString() + " " + ics.get(uri)
-// // }
-
-
-// String flagGroupwise = flags[sim_id];
-// SMconf smConf = new SMconf(flagGroupwise);
-// smConf.setICconf(icConf);
-
-// def result = new Double[genes.size() * genes.size()]
-// for (i = 0; i < result.size(); i++) {
-//   result[i] = i
+// List<String> flags = new ArrayList<String>(SMConstants.SIM_GROUPWISE_DAG.keySet());
+// System.out.println(flags.size());
+ICconf icConf = new IC_Conf_Topo("Sanchez", SMConstants.FLAG_ICI_SANCHEZ_2011);
+// Map<URI, Double> ics = engine.getIC_results(icConf);
+// for(URI uri: ics.keySet()) {
+//   println uri.toString() + " " + ics.get(uri)
 // }
 
-// def c = 0
 
-// GParsPool.withPool {
-//   result.eachParallel { val ->
-//     def i = val.toInteger()
-//     def x = i.intdiv(genes.size())
-//     def y = i % genes.size()
-//     if (x <= y) {
-//       result[i] = engine.compare(
-//               smConf,
-//               genes[x].getAnnotations(),
-//               genes[y].getAnnotations())
-//       if (c % 100000 == 0)
-//         println c
-//       c++
-//     }
-//   }
-// }
+String flagGroupwise = flags[sim_id];
+SMconf smConf = new SMconf(flagGroupwise);
+smConf.setICconf(icConf);
 
-// def fout = new PrintWriter(new BufferedWriter(
-//   new FileWriter("groupwise/" + flagGroupwise + ".txt")))
-// for (i = 0; i < result.size(); i++) {
-//   def x = i.intdiv(genes.size())
-//   def y = i % genes.size()
-//   if (x <= y) {
-//     fout.println(result[i])
-//   } else {
-//     def j = y * genes.size() + x
-//     fout.println(result[j])
-//   }
-// }
-// fout.flush()
-// fout.close()
+def result = new Double[genes.size() * genes.size()]
+for (i = 0; i < result.size(); i++) {
+  result[i] = i
+}
+
+def c = 0
+
+GParsPool.withPool {
+  result.eachParallel { val ->
+    def i = val.toInteger()
+    def x = i.intdiv(genes.size())
+    def y = i % genes.size()
+    if (x <= y) {
+      result[i] = engine.compare(
+              smConf,
+              genes[x].getAnnotations(),
+              genes[y].getAnnotations())
+      if (c % 100000 == 0)
+        println c
+      c++
+    }
+  }
+}
+
+def fout = new PrintWriter(new BufferedWriter(
+  new FileWriter("groupwise/" + flagGroupwise + ".txt")))
+for (i = 0; i < result.size(); i++) {
+  def x = i.intdiv(genes.size())
+  def y = i % genes.size()
+  if (x <= y) {
+    fout.println(result[i])
+  } else {
+    def j = y * genes.size() + x
+    fout.println(result[j])
+  }
+}
+fout.flush()
+fout.close()
