@@ -11,6 +11,7 @@ DATA_ROOT = 'data/'
 def get_annotations():
     gene_ontology = get_gene_ontology()
     annots = dict()
+    gene_name = dict()
     with open(DATA_ROOT + 'gene_association.sgd', 'r') as f:
         for line in f:
             if line[0] == '!':
@@ -19,6 +20,7 @@ def get_annotations():
             if items[3] == 'NOT' or items[6] == 'ND':
                 continue
             gene_id = items[1]
+            gene_name[gene_id] = items[2]
             go = items[4]
             if gene_id not in annots:
                 annots[gene_id] = set()
@@ -30,12 +32,12 @@ def get_annotations():
         if l not in groups:
             groups[l] = list()
         groups[l].append((list(gos), gene_id))
-    with open(DATA_ROOT + 'sgd_annotations_genes.txt', 'w') as f:
+    with open(DATA_ROOT + 'sgd_annotations_genes2.txt', 'w') as f:
         for group in sorted(groups.keys()):
             gos_list = groups[group]
             print group
             for gos, gene_id in gos_list:
-                f.write(gene_id + '\t')
+                f.write(gene_name[gene_id] + '\t')
                 f.write(gos[0])
                 for go in gos[1:]:
                     f.write('\t' + go)

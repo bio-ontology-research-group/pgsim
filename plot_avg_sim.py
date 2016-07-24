@@ -15,14 +15,14 @@ def draw(measures, filename):
     groups, mean, var = get_total_average_sims(measures, filename)
     # groups, mean, var = get_diff_average_sims(measures, filename)
     # plt.plot(groups, mean)
-    plt.errorbar(groups, mean, yerr=var, fmt='o')
+    plt.errorbar(groups, mean, fmt='o')
     if measures.endswith('depth'):
         plt.xlabel('Annotation depth')
     else:
         plt.xlabel('Annotation size')
     plt.ylabel('Average similarity')
     plt.title(name)
-    plt.savefig(DATA_ROOT + measures + '/' + name + '.avg.pdf')
+    plt.savefig(DATA_ROOT + '/' + name + '.avg.pdf')
 
 
 def main(*args, **kwargs):

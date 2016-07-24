@@ -15,8 +15,8 @@ def get_correlations(measures, filename):
     annotation size with mean and annotation size with variance
     '''
     corrs = list()
-    annots, mean, var = get_total_average_sims(measures, filename)
-    # annots, mean, var = get_diff_average_sims(measures, filename)
+    # annots, mean, var = get_total_average_sims(measures, filename)
+    annots, mean, var = get_diff_average_sims(measures, filename)
     r1, p1 = spearmanr(annots, mean)
     r2, p2 = spearmanr(annots, var)
     corrs.append((r1, p1, r2, p2))
@@ -34,7 +34,7 @@ def main(*args, **kwargs):
     basename = os.path.basename(filename)
     name = os.path.splitext(basename)[0]
     corrs = get_correlations(measures, filename)
-    with open(DATA_ROOT + measures + '/' + name + '.corr.tsv', 'w') as f:
+    with open(DATA_ROOT + measures + '/' + name + '.diff.tsv', 'w') as f:
         f.write('MEAN_CORR\tPVAL\tVAR_CORR\tPVAL\n')
         for corr in corrs:
             f.write('%f\t%f\t%f\t%f\n' % corr)

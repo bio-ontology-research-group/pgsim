@@ -49,62 +49,66 @@ class Gene {
 }
 
 
-def getGeneOntology = {
-
-  URI graph_uri = factory.getURI("http://go/")
-  factory.loadNamespacePrefix("GO", graph_uri.toString())
-  G graph = new GraphMemory(graph_uri)
+def getHPOntology = {
 
   // Load OBO file to graph "go.obo"
-  GDataConf goConf = new GDataConf(GFormat.OBO, "data/gene_ontology_ext.obo")
-  GraphLoaderGeneric.populate(goConf, graph)
+  String goOBO = "data/hp.obo";
+  // String annot = "data/gene_association.goa_uniprot.txt";
 
-  // Add virtual root for 3 subontologies__________________________________
-  URI virtualRoot = factory.getURI("http://go/virtualRoot")
+  URI graph_uri = factory.getURI("http://hp/");
+
+  factory.loadNamespacePrefix("HP", graph_uri.toString());
+
+  GraphConf graphConf = new GraphConf(graph_uri);
+  graphConf.addGDataConf(new GDataConf(GFormat.OBO, goOBO));
+  // graphConf.addGDataConf(new GDataConf(GFormat.GAF2, annot));
+
+  G graph = GraphLoaderGeneric.load(graphConf);
+  URI virtualRoot = factory.getURI("http://hp/virtualRoot")
   graph.addV(virtualRoot)
   GAction rooting = new GAction(GActionType.REROOTING)
   rooting.addParameter("root_uri", virtualRoot.stringValue())
   GraphActionExecutor.applyAction(factory, rooting, graph)
-  return graph
-}
 
-def getURIfromGO = { go ->
-  def id = go.split('\\:')[1]
-  return factory.getURI("http://go/" + id)
+  return graph
 }
 
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/sgd_random_annotations.txt").splitEachLine('\t') { items ->
+  new File("data/hp_annotations.txt").splitEachLine('\t') { items ->
     def s = 0
     genes.push(new Gene(i, new LinkedHashSet()))
     for (item in items) {
-      genes[i].addAnnotation(getURIfromGO(item))
+      genes[i].addAnnotation(factory.getURI(item))
     }
     i++
   }
   return genes
 }
 
-graph = getGeneOntology()
+graph = getHPOntology()
 genes = getGenes()
 
 def sim_id = this.args[0].toInteger()
 
 SM_Engine engine = new SM_Engine(graph)
 
-// BMA+Resnik, BMA+Schlicker2006, BMA+Lin1998, BMA+Jiang+Conrath1997,
-// DAG-GIC, DAG-NTO, DAG-UI
+
+// String[] flags = [
+//   SMConstants.FLAG_SIM_GROUPWISE_AVERAGE,
+//   SMConstants.FLAG_SIM_GROUPWISE_AVERAGE_NORMALIZED_GOSIM,
+//   SMConstants.FLAG_SIM_GROUPWISE_BMA,
+//   SMConstants.FLAG_SIM_GROUPWISE_BMM,
+//   SMConstants.FLAG_SIM_GROUPWISE_MAX,
+//   SMConstants.FLAG_SIM_GROUPWISE_MIN,
+//   SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM,
+//   SMConstants.FLAG_SIM_GROUPWISE_SVM
+// ]
 
 String[] flags = [
   SMConstants.FLAG_SIM_GROUPWISE_AVERAGE,
-  SMConstants.FLAG_SIM_GROUPWISE_AVERAGE_NORMALIZED_GOSIM,
   SMConstants.FLAG_SIM_GROUPWISE_BMA,
-  SMConstants.FLAG_SIM_GROUPWISE_BMM,
-  SMConstants.FLAG_SIM_GROUPWISE_MAX,
-  SMConstants.FLAG_SIM_GROUPWISE_MIN,
-  SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
 ]
 
 // List<String> pairFlags = new ArrayList<String>(SMConstants.PAIRWISE_MEASURE_FLAGS);
@@ -152,7 +156,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("pairwise/" + flagGroupwise + "_" + flagPairwise + ".txt")))
+  new FileWriter("data/pairwise_hp/" + flagGroupwise + "_" + flagPairwise + ".txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(genes.size())
   def y = i % genes.size()

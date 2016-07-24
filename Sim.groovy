@@ -51,20 +51,26 @@ class Gene {
 
 def getGeneOntology = {
 
-  URI graph_uri = factory.getURI("http://go/")
-  factory.loadNamespacePrefix("GO", graph_uri.toString())
-  G graph = new GraphMemory(graph_uri)
-
   // Load OBO file to graph "go.obo"
-  GDataConf goConf = new GDataConf(GFormat.OBO, "data/gene_ontology_ext.obo")
-  GraphLoaderGeneric.populate(goConf, graph)
+  String goOBO = "data/gene_ontology_ext.obo";
+  // String annot = "data/gene_association.goa_uniprot.txt";
 
+  URI graph_uri = factory.getURI("http://go/");
+
+  factory.loadNamespacePrefix("GO", graph_uri.toString());
+
+  GraphConf graphConf = new GraphConf(graph_uri);
+  graphConf.addGDataConf(new GDataConf(GFormat.OBO, goOBO));
+  // graphConf.addGDataConf(new GDataConf(GFormat.GAF2, annot));
+
+  G graph = GraphLoaderGeneric.load(graphConf);
   // Add virtual root for 3 subontologies__________________________________
   URI virtualRoot = factory.getURI("http://go/virtualRoot")
   graph.addV(virtualRoot)
   GAction rooting = new GAction(GActionType.REROOTING)
   rooting.addParameter("root_uri", virtualRoot.stringValue())
   GraphActionExecutor.applyAction(factory, rooting, graph)
+
   return graph
 }
 
@@ -98,7 +104,7 @@ def getURIfromGO = { go ->
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/sgd_annotations.txt").splitEachLine('\t') { items ->
+  new File("data/sgd_random_annotations.txt").splitEachLine('\t') { items ->
     def s = 0
     genes.push(new Gene(i, new LinkedHashSet()))
     for (item in items) {
@@ -119,16 +125,18 @@ SM_Engine engine = new SM_Engine(graph)
 
 // DAG-GIC, DAG-NTO, DAG-UI
 
-// String[] flags = [
-//   SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
-//   SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
-//   SMConstants.FLAG_SIM_GROUPWISE_DAG_UI
-// ]
+String[] flags = [
+  SMConstants.FLAG_SIM_GROUPWISE_DAG_GIC,
+  SMConstants.FLAG_SIM_GROUPWISE_DAG_NTO,
+  SMConstants.FLAG_SIM_GROUPWISE_DAG_UI
+]
 
 // All
 // List<String> flags = new ArrayList<String>(SMConstants.SIM_GROUPWISE_DAG.keySet());
 // System.out.println(flags.size());
 ICconf icConf = new IC_Conf_Topo("Sanchez", SMConstants.FLAG_ICI_SANCHEZ_2011);
+// ICconf icConf = new IC_Conf_Corpus(SMConstants.FLAG_IC_ANNOT_RESNIK_1995);
+
 // Map<URI, Double> ics = engine.getIC_results(icConf);
 // for(URI uri: ics.keySet()) {
 //   println uri.toString() + " " + ics.get(uri)
@@ -164,7 +172,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("groupwise/" + flagGroupwise + ".txt")))
+  new FileWriter("data/groupwise_sgd_random/" + flagGroupwise + ".txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(genes.size())
   def y = i % genes.size()

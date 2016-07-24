@@ -1,5 +1,5 @@
 #!/bin/bash
-MEASURES=("groupwise_sgd" "pairwise_sgd" "groupwise_new" "pairwise_new" "groupwise_depth" "pairwise_depth" )
+MEASURES=("pairwise_new" "pairwise_sgd" )
 for m in ${MEASURES[@]}; do
     echo $m;
     FILES="data/$m/*.txt"
@@ -8,7 +8,7 @@ for m in ${MEASURES[@]}; do
     for f in $FILES; do
         bname=$(basename "$f")
         filename="${bname%.*}"
-        if [ ! -e "$ROOT$filename.corr.tsv" ]; then
+        if [ ! -e "$ROOT$filename.diff.tsv" ]; then
             echo "Running correlation for $filename"
             python correlation_sgd.py $m $filename.txt
         fi

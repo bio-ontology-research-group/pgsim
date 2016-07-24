@@ -27,13 +27,21 @@ GENE_GROUPS['groupwise_sgd'] = GENE_GROUPS['pairwise_sgd'] = get_gene_groups()
 GENE_NUM['groupwise_sgd'] = GENE_NUM['pairwise_sgd'] = len(
     GENE_GROUPS['groupwise_sgd'])
 
-# Random annotations from  1 to 10
+# Random annotations from  1 to 55
 GENE_GROUPS['groupwise_new'] = list()
 for i in range(1, 56):
     for j in range(0, 100):
         GENE_GROUPS['groupwise_new'].append(i)
 GENE_GROUPS['pairwise_new'] = GENE_GROUPS['groupwise_new']
 GENE_NUM['groupwise_new'] = GENE_NUM['pairwise_new'] = 5500
+
+# Random annotations from  1 to 55
+GENE_GROUPS['groupwise_hp'] = list()
+for i in range(1, 56):
+    for j in range(0, 100):
+        GENE_GROUPS['groupwise_hp'].append(i)
+GENE_GROUPS['pairwise_hp'] = GENE_GROUPS['groupwise_hp']
+GENE_NUM['groupwise_hp'] = GENE_NUM['pairwise_hp'] = 5500
 
 # Random annotations from  1 to 10
 GENE_GROUPS['groupwise_depth'] = list()

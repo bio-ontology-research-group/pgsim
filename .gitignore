@@ -7,3 +7,4 @@
 data/
 target/
 venv/
+.DS_Store
