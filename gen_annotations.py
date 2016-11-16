@@ -72,14 +72,14 @@ def gen_hp_annotations():
                 f.write('\n')
 
 
-def gen_sgd_random_annotations():
+def gen_random_annotations():
     print len(go)
     go_ids = [go_id for go_id in go if 'is_obsolete' not in go[go_id]]
     print len(go_ids)
     print len(go) - len(go_ids)
     shuffle(go_ids)
     groups = get_gene_groups()
-    with open('data/sgd_random_annotations.txt', 'w') as f:
+    with open('data/mgi_annotations_random.txt', 'w') as f:
         for group in groups:
             shuffle(go_ids)
             f.write(go_ids[0])
@@ -147,7 +147,7 @@ def assign_sgd_real_annots():
 
 
 def main():
-    gen_sgd_random_annotations()
+    gen_random_annotations()
 
 if __name__ == '__main__':
     main()

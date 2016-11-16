@@ -4,6 +4,7 @@
 *.pdf
 *.gz
 *.pyc
+*.out
 data/
 target/
 venv/

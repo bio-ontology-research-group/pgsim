@@ -14,9 +14,9 @@ def load_data(measures, filename):
 
 def get_gene_groups():
     groups = list()
-    with open('data/sgd_annotations.txt', 'r') as f:
+    with open('data/mgi_annotations_genes.txt', 'r') as f:
         for line in f:
-            group = len(line.split('\t'))
+            group = len(line.split('\t')) - 1
             groups.append(group)
     return groups
 

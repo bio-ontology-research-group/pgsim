@@ -49,18 +49,18 @@ class Gene {
 }
 
 
-def getGeneOntology = {
+def getDiseaseOntology = {
 
-  URI graph_uri = factory.getURI("http://go/")
+  URI graph_uri = factory.getURI("http://purl.obolibrary.org/obo/")
   factory.loadNamespacePrefix("GO", graph_uri.toString())
   G graph = new GraphMemory(graph_uri)
 
   // Load OBO file to graph "go.obo"
-  GDataConf goConf = new GDataConf(GFormat.OBO, "data/gene_ontology_ext.obo")
+  GDataConf goConf = new GDataConf(GFormat.RDF_XML, "data/asif/doid.owl")
   GraphLoaderGeneric.populate(goConf, graph)
 
   // Add virtual root for 3 subontologies__________________________________
-  URI virtualRoot = factory.getURI("http://go/virtualRoot")
+  URI virtualRoot = factory.getURI("http://purl.obolibrary.org/obo/virtualRoot")
   graph.addV(virtualRoot)
   GAction rooting = new GAction(GActionType.REROOTING)
   rooting.addParameter("root_uri", virtualRoot.stringValue())
@@ -68,29 +68,35 @@ def getGeneOntology = {
   return graph
 }
 
-def getURIfromGO = { go ->
-  def id = go.split('\\:')[1]
-  return factory.getURI("http://go/" + id)
+def getURIfromDO = { do_id ->
+  // def id = go.split('_')[1]
+  return factory.getURI("http://purl.obolibrary.org/obo/" + do_id)
 }
 
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/mgi_annotations_random.txt").splitEachLine('\t') { items ->
+  new File("data/asif/gene_disease_annotation.tab").splitEachLine('\t') { items ->
     def s = 0
-    genes.push(new Gene(i, new LinkedHashSet()))
-    for (int j = 0; j < items.size(); j++) {
-      genes[i].addAnnotation(getURIfromGO(items[j]))
+    if (!items[0].startsWith("#")) {
+      genes.push(new Gene(i, new LinkedHashSet()))
+      // def gos = items[2].split("; ")
+      for (int j = 1; j < items.size(); j++) {
+        genes[i].addAnnotation(getURIfromDO(items[j]))
+      }
+      if (genes[i].getAnnotations().size() == 0) {
+        println(items[0] + " " + i)
+      }
+      i++
     }
-    i++
   }
   return genes
 }
 
-graph = getGeneOntology()
+graph = getDiseaseOntology()
 genes = getGenes()
 
-def sim_id = 0 //this.args[0].toInteger()
+def sim_id = 0 // this.args[0].toInteger()
 
 SM_Engine engine = new SM_Engine(graph)
 
@@ -98,21 +104,21 @@ SM_Engine engine = new SM_Engine(graph)
 // DAG-GIC, DAG-NTO, DAG-UI
 
 String[] flags = [
-  // SMConstants.FLAG_SIM_GROUPWISE_AVERAGE,
+  // SMConstants.FLAG_SIM_GROUPWISE_AVERAGE
   // SMConstants.FLAG_SIM_GROUPWISE_AVERAGE_NORMALIZED_GOSIM,
-  SMConstants.FLAG_SIM_GROUPWISE_BMA,
-  SMConstants.FLAG_SIM_GROUPWISE_BMM,
-  SMConstants.FLAG_SIM_GROUPWISE_MAX,
-  SMConstants.FLAG_SIM_GROUPWISE_MIN,
-  SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
+  SMConstants.FLAG_SIM_GROUPWISE_BMA
+  // SMConstants.FLAG_SIM_GROUPWISE_BMM,
+  // SMConstants.FLAG_SIM_GROUPWISE_MAX,
+  // SMConstants.FLAG_SIM_GROUPWISE_MIN,
+  // SMConstants.FLAG_SIM_GROUPWISE_MAX_NORMALIZED_GOSIM
 ]
 
 // List<String> pairFlags = new ArrayList<String>(SMConstants.PAIRWISE_MEASURE_FLAGS);
 String[] pairFlags = [
-  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_RESNIK_1995,
-  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006,
-  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_LIN_1998,
-  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_JIANG_CONRATH_1997_NORM
+  SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_RESNIK_1995
+  // SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_SCHLICKER_2006,
+  // SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_LIN_1998,
+  // SMConstants.FLAG_SIM_PAIRWISE_DAG_NODE_JIANG_CONRATH_1997_NORM
 ]
 
 ICconf icConf = new IC_Conf_Topo("Sanchez", SMConstants.FLAG_ICI_SANCHEZ_2011);
@@ -152,7 +158,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("data/mgi/pairwise_random/" + flagGroupwise + "_" + flagPairwise + ".txt")))
+  new FileWriter("data/asif/doid.txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(genes.size())
   def y = i % genes.size()
