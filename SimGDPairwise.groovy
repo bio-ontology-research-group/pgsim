@@ -151,7 +151,7 @@ def c = 0
 GParsPool.withPool {
   result.eachParallel { val ->
     def i = val.toInteger()
-    def x = i.intdiv(genes.size())
+    def x = i.intdiv(diseases.size())
     def y = i % diseases.size()
     result[i] = engine.compare(
             smConfGroupwise,
@@ -167,8 +167,8 @@ GParsPool.withPool {
 def fout = new PrintWriter(new BufferedWriter(
   new FileWriter("data/gene_disease/pairwise/sim_gene_disease.txt")))
 for (i = 0; i < result.size(); i++) {
-  def x = i.intdiv(genes.size())
-  def y = i % genes.size()
+  def x = i.intdiv(diseases.size())
+  def y = i % diseases.size()
   fout.println(result[i])
 }
 fout.flush()

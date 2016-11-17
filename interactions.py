@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from scipy.stats import spearmanr, pearsonr, wilcoxon
 
-DATA_ROOT = 'data/mgi/pairwise_random/'
+DATA_ROOT = 'data/human/pairwise_random/'
 
 
 def get_interactions():
@@ -71,7 +71,7 @@ def get_interactions():
 
 def load_interactions():
     gene_gene = dict()
-    with open('data/interactions.mgi.filtered.tab', 'r') as f:
+    with open('data/interactions.human.filtered.tab', 'r') as f:
         for line in f:
             items = line.strip().split('\t')
             gene_gene[items[0]] = set(items[1:])
@@ -90,7 +90,7 @@ def load_data(filename):
 def interactions_scores(data):
     gene_ind = dict()
     gene_int = load_interactions()
-    with open('data/mgi_annotations_genes.txt', 'r') as f:
+    with open('data/human_annotations_genes.txt', 'r') as f:
         ind = 0
         for line in f:
             items = line.strip().split('\t')
@@ -154,7 +154,7 @@ def compute_roc():
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve BMA Resnik - yeast')
+    plt.title('ROC Curve BMA Resnik - human')
     plt.legend(loc="lower right")
     plt.show()
 
@@ -226,8 +226,8 @@ def compute_wilcoxon():
 
 
 def main():
-    # compute_roc()
-    get_interactions()
+    compute_roc()
+    # get_interactions()
     # correlation()
     # load_interactions()
     # compute_wilcoxon()
