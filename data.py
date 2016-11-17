@@ -12,9 +12,9 @@ def load_data(measures, filename):
     return data
 
 
-def get_gene_groups():
+def get_gene_groups(filename):
     groups = list()
-    with open('data/mgi_annotations_genes.txt', 'r') as f:
+    with open(filename, 'r') as f:
         for line in f:
             group = len(line.split('\t')) - 1
             groups.append(group)
@@ -23,7 +23,7 @@ def get_gene_groups():
 # Yeast data
 GENE_GROUPS = dict()
 GENE_NUM = dict()
-GENE_GROUPS['groupwise_sgd'] = GENE_GROUPS['pairwise_sgd'] = get_gene_groups()
+GENE_GROUPS['groupwise_sgd'] = GENE_GROUPS['pairwise_sgd'] = get_gene_groups('data/sgd_annotations_genes.txt')
 GENE_NUM['groupwise_sgd'] = GENE_NUM['pairwise_sgd'] = len(
     GENE_GROUPS['groupwise_sgd'])
 

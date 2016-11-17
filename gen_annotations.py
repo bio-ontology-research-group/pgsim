@@ -4,11 +4,13 @@ import sys
 import os
 import numpy
 import random
-from utils import get_gene_ontology, shuffle
+from utils import get_obo_ontology, shuffle
 from data import get_gene_groups
 
-go = get_gene_ontology()
+go = get_obo_ontology('data/gene_ontology_ext.obo')
+hp = get_obo_ontology('data/hp.obo')
 go_depth = dict()
+DATA_ROOT = 'data/gene_disease/'
 
 
 def get_go_by_depth(go_id, level):
@@ -73,13 +75,10 @@ def gen_hp_annotations():
 
 
 def gen_random_annotations():
-    print len(go)
-    go_ids = [go_id for go_id in go if 'is_obsolete' not in go[go_id]]
-    print len(go_ids)
-    print len(go) - len(go_ids)
+    go_ids = list(hp.keys())
     shuffle(go_ids)
-    groups = get_gene_groups()
-    with open('data/mgi_annotations_random.txt', 'w') as f:
+    groups = get_gene_groups(DATA_ROOT + 'human_pheno_annotations_genes.txt')
+    with open(DATA_ROOT + 'human_pheno_annotations_genes_random.txt', 'w') as f:
         for group in groups:
             shuffle(go_ids)
             f.write(go_ids[0])

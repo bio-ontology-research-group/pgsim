@@ -9,7 +9,7 @@ DATA_ROOT = 'data/mgi/pairwise_random/'
 
 def get_interactions():
     gene_gene = dict()
-    with open('data/interactions.mgi.tab', 'r') as f:
+    with open('data/interactions.human.tab', 'r') as f:
         for line in f:
             if line.startswith('#'):
                 continue
@@ -43,7 +43,7 @@ def get_interactions():
     genes = set()
     # ints = list()
     # funcs = list()
-    with open('data/mgi_annotations_genes.txt', 'r') as f:
+    with open('data/human_annotations_genes.txt', 'r') as f:
         for line in f:
             items = line.split('\t')
             gene_id = items[0].upper()
@@ -55,7 +55,7 @@ def get_interactions():
     # r, p = spearmanr(funcs, ints)
     # print r, p
 
-    with open('data/interactions.mgi.filtered.tab', 'w') as f:
+    with open('data/interactions.human.filtered.tab', 'w') as f:
         for g_id in genes:
             if g_id in gene_gene:
                 ints = set()
@@ -226,8 +226,8 @@ def compute_wilcoxon():
 
 
 def main():
-    compute_roc()
-    # get_interactions()
+    # compute_roc()
+    get_interactions()
     # correlation()
     # load_interactions()
     # compute_wilcoxon()
