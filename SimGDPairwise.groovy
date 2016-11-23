@@ -24,7 +24,8 @@ import slib.graph.io.util.*
 import slib.graph.io.loader.*
 import groovyx.gpars.GParsPool
 
-
+System.setProperty("jdk.xml.entityExpansionLimit", "0");
+System.setProperty("jdk.xml.totalEntitySizeLimit", "0");
 
 def factory = URIFactoryMemory.getSingleton()
 
@@ -51,16 +52,15 @@ class Gene {
 
 def getGeneOntology = {
 
-  URI graph_uri = factory.getURI("http://hp/")
-  factory.loadNamespacePrefix("HP", graph_uri.toString())
+  URI graph_uri = factory.getURI("http://purl.obolibrary.org/obo/")
   G graph = new GraphMemory(graph_uri)
 
   // Load OBO file to graph "go.obo"
-  GDataConf goConf = new GDataConf(GFormat.OBO, "data/hp.obo")
+  GDataConf goConf = new GDataConf(GFormat.RDF_XML, "data/a-inferred.owl")
   GraphLoaderGeneric.populate(goConf, graph)
 
   // Add virtual root for 3 subontologies__________________________________
-  URI virtualRoot = factory.getURI("http://hp/virtualRoot")
+  URI virtualRoot = factory.getURI("http://purl.obolibrary.org/obo/virtualRoot")
   graph.addV(virtualRoot)
   GAction rooting = new GAction(GActionType.REROOTING)
   rooting.addParameter("root_uri", virtualRoot.stringValue())
@@ -69,14 +69,14 @@ def getGeneOntology = {
 }
 
 def getURIfromGO = { go ->
-  def id = go.split('\\:')[1]
-  return factory.getURI("http://hp/" + id)
+  def id = go.split('\\:')
+  return factory.getURI("http://purl.obolibrary.org/obo/" + id[0] + "_" + id[1])
 }
 
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/gene_disease/human_pheno_annotations_genes.txt").splitEachLine('\t') { items ->
+  new File("data/gene_disease/mouse_pheno_annotations_genes.txt").splitEachLine('\t') { items ->
     def s = 0
     genes.push(new Gene(i, new LinkedHashSet()))
     for (int j = 1; j < items.size(); j++) {
@@ -90,7 +90,7 @@ def getGenes = {
 def getDiseases = {
   def dis = []
   def i = 0
-  new File("data/gene_disease/human_pheno_annotations_diseases.txt").splitEachLine('\t') { items ->
+  new File("data/gene_disease/mouse_pheno_annotations_diseases.txt").splitEachLine('\t') { items ->
     def s = 0
     dis.push(new Gene(i, new LinkedHashSet()))
     for (int j = 1; j < items.size(); j++) {
@@ -105,6 +105,12 @@ graph = getGeneOntology()
 genes = getGenes()
 diseases = getDiseases()
 
+// for (URI v: graph.getV()) {
+//   if (v.toString().indexOf("HP_") != -1 || v.toString().indexOf("MP_") != -1)
+//     println v.toString();
+// }
+
+// return
 def sim_id = 0 //this.args[0].toInteger()
 
 SM_Engine engine = new SM_Engine(graph)
@@ -165,7 +171,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("data/gene_disease/pairwise/sim_gene_disease.txt")))
+  new FileWriter("data/gene_disease/pairwise/mouse_sim_gene_disease.txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(diseases.size())
   def y = i % diseases.size()

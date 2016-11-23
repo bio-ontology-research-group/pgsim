@@ -9,6 +9,7 @@ from data import get_gene_groups
 
 go = get_obo_ontology('data/gene_ontology_ext.obo')
 hp = get_obo_ontology('data/hp.obo')
+mp = get_obo_ontology('data/MPheno_OBO.ontology')
 go_depth = dict()
 DATA_ROOT = 'data/gene_disease/'
 
@@ -74,11 +75,20 @@ def gen_hp_annotations():
                 f.write('\n')
 
 
+def get_phenos():
+    phenos = set()
+    with open(DATA_ROOT + 'phenos.txt', 'r') as f:
+        for line in f:
+            pheno = line.strip()
+            phenos.add(pheno)
+    return phenos
+
+
 def gen_random_annotations():
-    go_ids = list(hp.keys())
+    go_ids = [pheno for pheno in get_phenos() if pheno.startswith("MP:")]
     shuffle(go_ids)
-    groups = get_gene_groups(DATA_ROOT + 'human_pheno_annotations_genes.txt')
-    with open(DATA_ROOT + 'human_pheno_annotations_genes_random.txt', 'w') as f:
+    groups = get_gene_groups(DATA_ROOT + 'mouse_pheno_annotations_genes.txt')
+    with open(DATA_ROOT + 'mouse_pheno_annotations_genes_random.txt', 'w') as f:
         for group in groups:
             shuffle(go_ids)
             f.write(go_ids[0])
