@@ -56,7 +56,7 @@ def getGeneOntology = {
   G graph = new GraphMemory(graph_uri)
 
   // Load OBO file to graph "go.obo"
-  GDataConf goConf = new GDataConf(GFormat.OBO, "data/gene_ontology_ext.obo")
+  GDataConf goConf = new GDataConf(GFormat.OBO, "data/go.obo")
   GraphLoaderGeneric.populate(goConf, graph)
 
   // Add virtual root for 3 subontologies__________________________________
@@ -76,10 +76,10 @@ def getURIfromGO = { go ->
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/mgi_annotations_random.txt").splitEachLine('\t') { items ->
+  new File("data/deepgo/human_annotations.tab").splitEachLine('\t') { items ->
     def s = 0
     genes.push(new Gene(i, new LinkedHashSet()))
-    for (int j = 0; j < items.size(); j++) {
+    for (int j = 1; j < items.size(); j++) {
       genes[i].addAnnotation(getURIfromGO(items[j]))
     }
     i++
@@ -152,7 +152,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("data/mgi/pairwise_random/" + flagGroupwise + "_" + flagPairwise + ".txt")))
+  new FileWriter("data/deepgo/sim_bma_resnik_exp.txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(genes.size())
   def y = i % genes.size()

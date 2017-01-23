@@ -4,12 +4,12 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 from scipy.stats import spearmanr, pearsonr, wilcoxon
 
-DATA_ROOT = 'data/human/pairwise_random/'
+DATA_ROOT = 'data/mgi/pairwise_random/'
 
 
 def get_interactions():
     gene_gene = dict()
-    with open('data/interactions.human.tab', 'r') as f:
+    with open('data/interactions.mouse.tab', 'r') as f:
         for line in f:
             if line.startswith('#'):
                 continue
@@ -71,10 +71,13 @@ def get_interactions():
 
 def load_interactions():
     gene_gene = dict()
-    with open('data/interactions.human.filtered.tab', 'r') as f:
+    pos = 0
+    with open('data/interactions.mgi.filtered.tab', 'r') as f:
         for line in f:
             items = line.strip().split('\t')
             gene_gene[items[0]] = set(items[1:])
+            pos += len(gene_gene[items[0]])
+    print(pos, len(gene_gene) * len(gene_gene) - pos)
     return gene_gene
 
 
@@ -90,7 +93,7 @@ def load_data(filename):
 def interactions_scores(data):
     gene_ind = dict()
     gene_int = load_interactions()
-    with open('data/human_annotations_genes.txt', 'r') as f:
+    with open('data/mgi_annotations_genes.txt', 'r') as f:
         ind = 0
         for line in f:
             items = line.strip().split('\t')
@@ -154,7 +157,7 @@ def compute_roc():
     plt.ylim([0.0, 1.05])
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve BMA Resnik - human')
+    plt.title('ROC Curve BMA Resnik - random mouse')
     plt.legend(loc="lower right")
     plt.show()
 
@@ -163,10 +166,10 @@ def correlation():
     ints = load_interactions()
     interactions = list()
     annotations = list()
-    with open('data/sgd_annotations_genes2.txt', 'r') as f:
+    with open('data/human_annotations_genes.txt', 'r') as f:
         for line in f:
             items = line.strip().split('\t')
-            gene_id = items[0]
+            gene_id = items[0].upper()
             annots = len(items) - 1
             annotations.append(annots)
             if gene_id in ints:
@@ -226,10 +229,11 @@ def compute_wilcoxon():
 
 
 def main():
-    compute_roc()
+    # correlation()
+    # compute_roc()
     # get_interactions()
     # correlation()
-    # load_interactions()
+    load_interactions()
     # compute_wilcoxon()
 
 if __name__ == '__main__':
