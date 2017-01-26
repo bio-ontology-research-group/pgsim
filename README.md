@@ -23,4 +23,5 @@ This repository includes different scripts in python and groovy used in the proj
 
 Repository also includes shell scripts for running some scripts for multiple files.
 
-
+Generated similarity values and plots can be found here:
+http://www.cbrc.kaust.edu.sa/onto/sim-eval/
