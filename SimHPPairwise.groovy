@@ -107,8 +107,8 @@ SM_Engine engine = new SM_Engine(graph)
 // ]
 
 String[] flags = [
-  SMConstants.FLAG_SIM_GROUPWISE_AVERAGE,
   SMConstants.FLAG_SIM_GROUPWISE_BMA,
+  SMConstants.FLAG_SIM_GROUPWISE_AVERAGE,
 ]
 
 // List<String> pairFlags = new ArrayList<String>(SMConstants.PAIRWISE_MEASURE_FLAGS);
@@ -137,35 +137,42 @@ for (i = 0; i < result.size(); i++) {
 
 def c = 0
 
-GParsPool.withPool {
-  result.eachParallel { val ->
-    def i = val.toInteger()
-    def x = i.intdiv(genes.size())
-    def y = i % genes.size()
-    if (x <= y) {
-      result[i] = engine.compare(
-              smConfGroupwise,
-              smConfPairwise,
-              genes[x].getAnnotations(),
-              genes[y].getAnnotations())
-      if (c % 100000 == 0)
-        println c
-      c++
-    }
-  }
-}
+def res = engine.compare(
+  smConfGroupwise,
+  smConfPairwise,
+  genes[1000].getAnnotations(),
+  genes[1000].getAnnotations())
+println(res)
 
-def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("data/pairwise_hp/" + flagGroupwise + "_" + flagPairwise + ".txt")))
-for (i = 0; i < result.size(); i++) {
-  def x = i.intdiv(genes.size())
-  def y = i % genes.size()
-  if (x <= y) {
-    fout.println(result[i])
-  } else {
-    def j = y * genes.size() + x
-    fout.println(result[j])
-  }
-}
-fout.flush()
-fout.close()
+// GParsPool.withPool {
+//   result.eachParallel { val ->
+//     def i = val.toInteger()
+//     def x = i.intdiv(genes.size())
+//     def y = i % genes.size()
+//     if (x <= y) {
+//       result[i] = engine.compare(
+//               smConfGroupwise,
+//               smConfPairwise,
+//               genes[x].getAnnotations(),
+//               genes[y].getAnnotations())
+//       if (c % 100000 == 0)
+//         println c
+//       c++
+//     }
+//   }
+// }
+
+// def fout = new PrintWriter(new BufferedWriter(
+//   new FileWriter("data/pairwise_hp/" + flagGroupwise + "_" + flagPairwise + ".txt")))
+// for (i = 0; i < result.size(); i++) {
+//   def x = i.intdiv(genes.size())
+//   def y = i % genes.size()
+//   if (x <= y) {
+//     fout.println(result[i])
+//   } else {
+//     def j = y * genes.size() + x
+//     fout.println(result[j])
+//   }
+// }
+// fout.flush()
+// fout.close()

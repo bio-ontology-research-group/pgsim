@@ -76,7 +76,7 @@ def getURIfromGO = { go ->
 def getGenes = {
   def genes = []
   def i = 0
-  new File("data/deepgo/human_annotations.tab").splitEachLine('\t') { items ->
+  new File("data/deepgo/test_annotations_human.tab").splitEachLine('\t') { items ->
     def s = 0
     genes.push(new Gene(i, new LinkedHashSet()))
     for (int j = 1; j < items.size(); j++) {
@@ -152,7 +152,7 @@ GParsPool.withPool {
 }
 
 def fout = new PrintWriter(new BufferedWriter(
-  new FileWriter("data/deepgo/sim_bma_resnik_exp.txt")))
+  new FileWriter("data/deepgo/sim_annotations.txt")))
 for (i = 0; i < result.size(); i++) {
   def x = i.intdiv(genes.size())
   def y = i % genes.size()
